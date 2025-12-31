@@ -1,0 +1,1572 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Global Success 7 — Unit 7: TRAFFIC (Offline Game)</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#0f1a2e; --text:#eaf0ff; --muted:#a9b6d6;
+      --line:#233656; --accent:#4dd6ff; --accent2:#79ffb0; --warn:#ffcc66; --bad:#ff5c7a; --good:#4cff9a;
+      --shadow:0 10px 30px rgba(0,0,0,.35); --r:18px;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{
+      margin:0; color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(77,214,255,.18), transparent 55%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(121,255,176,.14), transparent 55%),
+                  linear-gradient(180deg, #060b16, #0b1220 45%, #070c17);
+    }
+    .app{max-width:1180px;margin:0 auto;padding:16px 12px 40px}
+    .topbar{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow:var(--shadow); position:sticky; top:10px; z-index:50; backdrop-filter:blur(10px);
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-weight:900;color:#06101f;
+      background:linear-gradient(135deg, rgba(77,214,255,.9), rgba(121,255,176,.9));}
+    .t1{font-weight:900;font-size:14px}
+    .t2{font-size:12px;color:var(--muted);margin-top:2px}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .pill{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03)}
+    .btn{
+      border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+      padding:10px 12px;border-radius:12px;cursor:pointer;user-select:none;font-weight:800;
+      transition:.15s transform,.15s background;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.07)}
+    .btn:active{transform:translateY(0)}
+    .btn.primary{border-color:rgba(77,214,255,.45);background:rgba(77,214,255,.12)}
+    .btn.good{border-color:rgba(121,255,176,.45);background:rgba(121,255,176,.10)}
+    .btn.warn{border-color:rgba(255,204,102,.55);background:rgba(255,204,102,.10)}
+    .btn.bad{border-color:rgba(255,92,122,.55);background:rgba(255,92,122,.10)}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .range{appearance:none;height:6px;width:140px;background:rgba(255,255,255,.12);border-radius:999px;outline:none}
+    .range::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;
+      background:linear-gradient(135deg, rgba(77,214,255,.95), rgba(121,255,176,.95));border:2px solid rgba(0,0,0,.25);cursor:pointer}
+    .main{margin-top:14px;display:grid;grid-template-columns:320px 1fr;gap:14px}
+    @media (max-width:980px){.main{grid-template-columns:1fr}}
+    .sidebar,.content知道{
+      border:1px solid var(--line);border-radius:var(--r);background:rgba(255,255,255,.03);
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .sidebar,.content{
+      border:1px solid var(--line);border-radius:var(--r);background:rgba(255,255,255,.03);
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .sidebar{height:fit-content;position:sticky;top:92px}
+    @media (max-width:980px){.sidebar{position:relative;top:auto}}
+    .card{border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:12px;background:rgba(255,255,255,.02)}
+    .hr{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+    .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted)}
+    .nav{display:flex;flex-direction:column;gap:8px}
+    .navItem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px;
+      border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.02);cursor:pointer}
+    .navItem.active{border-color:rgba(77,214,255,.45);background:rgba(77,214,255,.10)}
+    .small{font-size:12px;color:var(--muted)}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .progressBar{height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:10px}
+    .progressBar>div{height:100%;width:0;background:linear-gradient(90deg, rgba(77,214,255,.95), rgba(121,255,176,.95));transition:width .25s}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+    @media (max-width:760px){.kpi{grid-template-columns:repeat(2,1fr)}}
+    .kpi .box{border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px;background:rgba(255,255,255,.02)}
+    .kpi .n{font-weight:900;font-size:18px}
+    .kpi .l{color:var(--muted);font-size:12px;margin-top:4px}
+    .sectionHeader{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+      border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:12px;margin-bottom:12px}
+    .sectionHeader h2{margin:0;font-size:18px}
+    .sectionHeader .sub{color:var(--muted);font-size:13px;margin-top:6px}
+    .q{border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:12px;background:rgba(8,14,28,.35);margin-bottom:10px}
+    .qTitle{margin:0 0 6px 0;font-weight:900;font-size:14px}
+    .opts{display:grid;gap:8px;margin-top:10px}
+    .opt{display:flex;gap:10px;align-items:flex-start;padding:10px 10px;border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;background:rgba(255,255,255,.02);cursor:pointer}
+    .opt input{margin-top:2px}
+    .opt.correct{border-color:rgba(76,255,154,.6);background:rgba(76,255,154,.08)}
+    .opt.wrong{border-color:rgba(255,92,122,.6);background:rgba(255,92,122,.08)}
+    .inp{width:min(720px,100%);padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);color:var(--text);outline:none}
+    .inp:focus{border-color:rgba(77,214,255,.45)}
+    .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);color:var(--muted)}
+    .tag.good{border-color:rgba(76,255,154,.45);color:rgba(76,255,154,.95)}
+    .tag.bad{border-color:rgba(255,92,122,.45);color:rgba(255,92,122,.95)}
+    .explain{margin-top:10px;border-top:1px dashed rgba(255,255,255,.14);padding-top:10px;display:none}
+    .explain.show{display:block}
+    .explain .row{display:grid;gap:6px;padding:8px 10px;border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;background:rgba(255,255,255,.02);margin-bottom:8px}
+    .toast{position:fixed;right:14px;bottom:14px;max-width:560px;padding:12px 14px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);background:rgba(10,16,30,.86);box-shadow:var(--shadow);display:none;z-index:999}
+    .toast.show{display:block}
+    .gridIcons{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:10px;margin-top:10px}
+    @media(max-width:760px){.gridIcons{grid-template-columns:repeat(2, minmax(0,1fr));}}
+    .iconCard{border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(255,255,255,.02);padding:10px}
+    .iconBig{font-size:30px}
+    .note{border:1px solid rgba(255,204,102,.35);background:rgba(255,204,102,.08);border-radius:16px;padding:10px 12px;color:#ffe8b5}
+    details summary{cursor:pointer}
+    pre{white-space:pre-wrap;margin:8px 0 0 0;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);padding:10px;border-radius:14px}
+    audio{width:min(760px,100%);margin-top:8px}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">U7</div>
+      <div>
+        <div class="t1">Global Success 7 — Unit 7: TRAFFIC (Game Offline)</div>
+        <div class="t2">01 file HTML • xáo trộn đáp án • chấm điểm • giải thích + dịch Việt • lưu tiến độ • chế độ GV</div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="pill"><span class="small">Thời gian</span><span id="timer" class="mono">00:00</span></div>
+      <button class="btn" id="btnSave">Lưu</button>
+      <button class="btn bad" id="btnReset">Xóa tiến độ</button>
+      <div class="pill">
+        <button class="btn primary" id="btnMusic">Nhạc: ON</button>
+        <input class="range" id="vol" type="range" min="0" max="100" value="35"/>
+      </div>
+      <button class="btn warn" id="btnTeacher">Chế độ GV</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <aside class="sidebar">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div>
+            <div style="font-weight:900">Tiến độ</div>
+            <div class="small" id="progressText">0/… phần • 0%</div>
+          </div>
+          <div class="badge" id="scoreBadge">0 điểm</div>
+        </div>
+        <div class="progressBar"><div id="progressBar"></div></div>
+        <div class="kpi">
+          <div class="box"><div class="n" id="kCorrect">0</div><div class="l">Đúng</div></div>
+          <div class="box"><div class="n" id="kWrong">0</div><div class="l">Sai</div></div>
+          <div class="box"><div class="n" id="kPercent">0%</div><div class="l">% đúng</div></div>
+          <div class="box"><div class="n" id="kDone">0%</div><div class="l">Hoàn thành</div></div>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="nav" id="nav"></div>
+      <div class="hr"></div>
+      <div class="note small">
+        Listening: cần thêm audio + trang còn thiếu (Activity 3). Hiện đã có khung nghe + nạp audio offline.
+      </div>
+    </aside>
+
+    <section class="content">
+      <div class="sectionHeader">
+        <div>
+          <h2 id="sectionTitle"></h2>
+          <div class="sub" id="sectionSub"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn good" id="btnSubmit">Nộp bài</button>
+          <button class="btn" id="btnExplain">Giải thích</button>
+          <button class="btn warn" id="btnAnswers">Xem đáp án</button>
+          <button class="btn bad" id="btnRetry">Làm lại phần</button>
+          <button class="btn primary" id="btnNext">Tiếp theo</button>
+        </div>
+      </div>
+
+      <div id="stage"></div>
+
+      <div class="hr"></div>
+      <div class="card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:900">Xuất kết quả</div>
+            <div class="small">Tổng điểm • % đúng • thời gian • chi tiết theo câu</div>
+          </div>
+          <button class="btn primary" id="btnExport">Xuất báo cáo</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================
+   0) STORAGE / SETTINGS
+========================= */
+const TEACHER_CODE = "TEACHER-2026";
+const LS_STATE = "GS7_U7_TRAFFIC_STATE_V1";
+const LS_SHUF  = "GS7_U7_TRAFFIC_SHUF_V1";
+const LS_MUSIC = "GS7_U7_TRAFFIC_MUSIC_V1";
+const LS_AUDIO = "GS7_U7_TRAFFIC_AUDIOPACK_V1";
+
+/* =========================
+   1) CONTENT (từ các trang bạn cung cấp)
+   - type: mcq | fill | write | match | info | listening
+   - answer: với mcq là nội dung đáp án đúng (không phải A/B/C/D)
+========================= */
+const CONTENT = [
+  {
+    key:"GS",
+    title:"GETTING STARTED",
+    sub:"Meeting in the schoolyard • Listen and read",
+    passage:{
+      title:"Dialogue (EN) + Dịch (VI)",
+      textEN:
+`Lan: Hi, Mark. How are you?
+Mark: Good, thanks. And you?
+What did you do last Sunday?
+Lan: I’m fine. Last Sunday afternoon, I cycled round the lake near my home.
+Mark: That sounds really healthy.
+By the way, do you often cycle to school too?
+Lan: Yes, but sometimes my mum takes me on her motorbike.
+Mark: How far is it from your home to school?
+Lan: It’s about two kilometres.
+Mark: How long does it take you to cycle there?
+Lan: About 10 minutes. Sometimes, when there are traffic jams, it takes longer.
+Mark: You should be careful, especially when you cross the road.
+Lan: Right. The roads get really crowded.
+Mark: Hey, how about going cycling round the lake this Sunday?
+Lan: Great! Can you come to my house at 3 p.m.?
+Mark: OK, Lan. See you then.`,
+      textVI:
+`Lan: Chào Mark. Bạn khỏe không?
+Mark: Mình khỏe, cảm ơn. Còn bạn?
+Chủ nhật vừa rồi bạn làm gì?
+Lan: Mình ổn. Chiều chủ nhật tuần trước, mình đạp xe vòng quanh hồ gần nhà.
+Mark: Nghe thật lành mạnh.
+Nhân tiện, bạn có thường đạp xe đến trường không?
+Lan: Có, nhưng đôi khi mẹ mình chở mình bằng xe máy.
+Mark: Từ nhà bạn đến trường xa bao nhiêu?
+Lan: Khoảng hai ki-lô-mét.
+Mark: Bạn mất bao lâu để đạp xe đến đó?
+Lan: Khoảng 10 phút. Đôi khi, khi bị tắc đường, sẽ lâu hơn.
+Mark: Bạn nên cẩn thận, nhất là khi băng qua đường.
+Lan: Đúng vậy. Đường rất đông.
+Mark: Này, chủ nhật này đi đạp xe quanh hồ nhé?
+Lan: Tuyệt! Bạn có thể đến nhà mình lúc 3 giờ chiều không?
+Mark: Được, Lan. Hẹn gặp bạn nhé.`
+    },
+    items:[
+      { id:"GS-2-1", type:"mcq", skill:"Read the conversation again and choose the correct answer.",
+        prompt:"How does Lan often go to school?",
+        choices:["By bicycle.","By motorbike.","On foot."],
+        answer:"By bicycle.",
+        explain:"Lan says she often cycles to school.",
+        vi:"Lan thường đến trường bằng cách nào? → Bằng xe đạp."},
+      { id:"GS-2-2", type:"mcq", skill:"Read the conversation again and choose the correct answer.",
+        prompt:"It normally takes Lan _____ to get to school.",
+        choices:["two minutes","ten minutes","twenty minutes"],
+        answer:"ten minutes",
+        explain:"Lan says: “About 10 minutes.”",
+        vi:"Bình thường Lan mất _____ để đến trường. → mười phút."},
+      { id:"GS-2-3", type:"mcq", skill:"Read the conversation again and choose the correct answer.",
+        prompt:"Lan and Mark agree to go cycling _____ .",
+        choices:["tomorrow","every day","at the weekend"],
+        answer:"at the weekend",
+        explain:"They plan to go cycling this Sunday.",
+        vi:"Lan và Mark đồng ý đi đạp xe _____. → vào cuối tuần."},
+
+      { id:"GS-3-1", type:"fill", skill:"Write one word from the conversation.",
+        prompt:"Last Sunday afternoon, Lan ______ round the lake near her home.",
+        answer:"cycled",
+        explain:"In the dialogue: “I cycled round the lake …”.",
+        vi:"Chiều chủ nhật tuần trước, Lan ______ quanh hồ gần nhà. → cycled (đạp xe)."},
+      { id:"GS-3-2", type:"fill", skill:"Write one word from the conversation.",
+        prompt:"Mark says to Lan: “You ______ be careful, especially when you cross the road.”",
+        answer:"should",
+        explain:"We use 'should' to give advice.",
+        vi:"Mark nói: “Bạn ______ cẩn thận…” → should (nên)."},
+      { id:"GS-3-3", type:"fill", skill:"Write one word from the conversation.",
+        prompt:"Traffic ______ are a problem in big cities.",
+        answer:"jams",
+        explain:"In the dialogue: “when there are traffic jams…”.",
+        vi:"Tắc đường là vấn đề ở các thành phố lớn. → jams."},
+      { id:"GS-3-4", type:"fill", skill:"Write one word from the conversation.",
+        prompt:"______ does your mum go shopping? – She often walks.",
+        answer:"How",
+        explain:"The question word is 'How' (How does she go?).",
+        vi:"______ mẹ bạn đi mua sắm bằng cách nào? → How."},
+      { id:"GS-3-5", type:"fill", skill:"Write one word from the conversation.",
+        prompt:"This road is very ______ during the rush hours.",
+        answer:"crowded",
+        explain:"Lan says: “The roads get really crowded.”",
+        vi:"Con đường này rất ______ vào giờ cao điểm. → crowded (đông đúc)."},
+
+      { id:"GS-4", type:"info", skill:"Look at the pictures and write a word under each.",
+        prompt:"Means of transport (1–8). (Không dùng ảnh SGK — dùng icon thay thế)",
+        vi:"Nhìn hình và viết từ chỉ phương tiện giao thông (1–8).",
+        data:{
+          icons:[
+            {n:1, icon:"🚲", labelEN:"bicycle", labelVI:"xe đạp"},
+            {n:2, icon:"🚗", labelEN:"car", labelVI:"ô tô"},
+            {n:3, icon:"🚌", labelEN:"bus", labelVI:"xe buýt"},
+            {n:4, icon:"🏍️", labelEN:"motorbike", labelVI:"xe máy"},
+            {n:5, icon:"✈️", labelEN:"plane", labelVI:"máy bay"},
+            {n:6, icon:"🚆", labelEN:"train", labelVI:"tàu hỏa"},
+            {n:7, icon:"🚤", labelEN:"boat", labelVI:"thuyền"},
+            {n:8, icon:"🛳️", labelEN:"ship", labelVI:"tàu (lớn)"}
+          ]
+        }
+      },
+      { id:"GS-4-1", type:"fill", skill:"Transport vocabulary",
+        prompt:"1. 🚲",
+        answer:"bicycle",
+        explain:"Bicycle = xe đạp.",
+        vi:"1. 🚲 → bicycle (xe đạp)."},
+      { id:"GS-4-2", type:"fill", skill:"Transport vocabulary",
+        prompt:"2. 🚗",
+        answer:"car",
+        explain:"Car = ô tô.",
+        vi:"2. 🚗 → car (ô tô)."},
+      { id:"GS-4-3", type:"fill", skill:"Transport vocabulary",
+        prompt:"3. 🚌",
+        answer:"bus",
+        explain:"Bus = xe buýt.",
+        vi:"3. 🚌 → bus (xe buýt)."},
+      { id:"GS-4-4", type:"fill", skill:"Transport vocabulary",
+        prompt:"4. 🏍️",
+        answer:"motorbike",
+        explain:"Motorbike = xe máy.",
+        vi:"4. 🏍️ → motorbike (xe máy)."},
+      { id:"GS-4-5", type:"fill", skill:"Transport vocabulary",
+        prompt:"5. ✈️",
+        answer:"plane",
+        explain:"Plane = máy bay.",
+        vi:"5. ✈️ → plane (máy bay)."},
+      { id:"GS-4-6", type:"fill", skill:"Transport vocabulary",
+        prompt:"6. 🚆",
+        answer:"train",
+        explain:"Train = tàu hỏa.",
+        vi:"6. 🚆 → train (tàu hỏa)."},
+      { id:"GS-4-7", type:"fill", skill:"Transport vocabulary",
+        prompt:"7. 🚤",
+        answer:"boat",
+        explain:"Boat = thuyền.",
+        vi:"7. 🚤 → boat (thuyền)."},
+      { id:"GS-4-8", type:"fill", skill:"Transport vocabulary",
+        prompt:"8. 🛳️",
+        answer:"ship",
+        explain:"Ship = tàu lớn.",
+        vi:"8. 🛳️ → ship (tàu lớn)."}
+    ]
+  },
+
+  {
+    key:"CL1",
+    title:"A CLOSER LOOK 1",
+    sub:"Vocabulary • Road signs",
+    items:[
+      { id:"CL1-1", type:"match", skill:"Vocabulary: Match A with B",
+        prompt:"Match the words in A with the phrases in B.",
+        vi:"Nối các từ ở cột A với cụm từ ở cột B.",
+        data:{
+          left:[
+            {k:"1", text:"ride"},
+            {k:"2", text:"drive"},
+            {k:"3", text:"sail"},
+            {k:"4", text:"go"},
+            {k:"5", text:"travel"}
+          ],
+          right:[
+            {k:"a", text:"a car"},
+            {k:"b", text:"a boat"},
+            {k:"c", text:"a bike"},
+            {k:"d", text:"by air"},
+            {k:"e", text:"on foot"}
+          ]
+        },
+        answer:{ "1":"c", "2":"a", "3":"b", "4":"e", "5":"d" },
+        explain:"Collocations: ride a bike; drive a car; sail a boat; go on foot; travel by air.",
+        vi_explain:"Cụm từ cố định: ride a bike; drive a car; sail a boat; go on foot; travel by air."
+      },
+
+      { id:"CL1-2", type:"info", skill:"Road signs",
+        prompt:"Look at these road signs. Then write the correct phrases under the signs.",
+        vi:"Nhìn các biển báo và viết đúng cụm từ dưới mỗi biển.",
+        data:{
+          phrases:["No right turn","Cycle lane","School ahead","Traffic lights","No cycling","Hospital ahead"],
+          signs:[
+            {n:1, icon:"🚦", hint:"Traffic lights"},
+            {n:2, icon:"🏥➡️", hint:"Hospital ahead"},
+            {n:3, icon:"↪️🚫", hint:"No right turn"},
+            {n:4, icon:"🚲🛣️", hint:"Cycle lane"},
+            {n:5, icon:"🏫➡️", hint:"School ahead"},
+            {n:6, icon:"🚲🚫", hint:"No cycling"}
+          ]
+        }
+      },
+      { id:"CL1-2-1", type:"fill", skill:"Road signs",
+        prompt:"1. 🚦",
+        answer:"Traffic lights",
+        explain:"The sign shows traffic lights.",
+        vi:"1. 🚦 → Traffic lights (đèn giao thông)."},
+      { id:"CL1-2-2", type:"fill", skill:"Road signs",
+        prompt:"2. 🏥➡️",
+        answer:"Hospital ahead",
+        explain:"Hospital ahead = phía trước có bệnh viện.",
+        vi:"2. 🏥➡️ → Hospital ahead (bệnh viện phía trước)."},
+      { id:"CL1-2-3", type:"fill", skill:"Road signs",
+        prompt:"3. ↪️🚫",
+        answer:"No right turn",
+        explain:"No right turn = cấm rẽ phải.",
+        vi:"3. ↪️🚫 → No right turn (cấm rẽ phải)."},
+      { id:"CL1-2-4", type:"fill", skill:"Road signs",
+        prompt:"4. 🚲🛣️",
+        answer:"Cycle lane",
+        explain:"Cycle lane = làn đường xe đạp.",
+        vi:"4. 🚲🛣️ → Cycle lane (làn xe đạp)."},
+      { id:"CL1-2-5", type:"fill", skill:"Road signs",
+        prompt:"5. 🏫➡️",
+        answer:"School ahead",
+        explain:"School ahead = phía trước có trường học.",
+        vi:"5. 🏫➡️ → School ahead (trường học phía trước)."},
+      { id:"CL1-2-6", type:"fill", skill:"Road signs",
+        prompt:"6. 🚲🚫",
+        answer:"No cycling",
+        explain:"No cycling = cấm đi xe đạp.",
+        vi:"6. 🚲🚫 → No cycling (cấm xe đạp)."}
+    ]
+  },
+
+  {
+    key:"CL2",
+    title:"A CLOSER LOOK 2",
+    sub:"Grammar • It indicating distance • should/shouldn’t",
+    items:[
+      { id:"CL2-IT-0", type:"info", skill:"Grammar",
+        prompt:"We can use It in the position of the subject to indicate distance. Example: It is about 300 metres from my house to the bus stop.",
+        vi:"Ta dùng 'It' làm chủ ngữ để nói về khoảng cách. VD: It is about 300 metres from my house to the bus stop.",
+        data:{} },
+
+      { id:"CL2-IT-1", type:"write", skill:"Write sentences with It (Use the cues).",
+        prompt:"1) 700 metres / my flat / Youth Club",
+        answer:"It is about 700 metres from my flat to the Youth Club.",
+        explain:"Form: It + be + (about) + distance + from A + to B.",
+        vi:"Viết câu với 'It': It is about 700 metres from my flat to the Youth Club. (Khoảng 700m từ căn hộ của tôi đến Câu lạc bộ Thanh thiếu niên).",
+        data:{hintEN:"It is about ... metres from ... to ..."} },
+
+      { id:"CL2-IT-2", type:"write", skill:"Write sentences with It (Use the cues).",
+        prompt:"2) 5 kilometres (km) / my village / nearest town",
+        answer:"It is about 5 kilometres from my village to the nearest town.",
+        explain:"Use 'kilometres' for long distance.",
+        vi:"It is about 5 kilometres from my village to the nearest town. (Khoảng 5km từ làng tôi đến thị trấn gần nhất).",
+        data:{hintEN:"It is about ... kilometres from ... to ..."} },
+
+      { id:"CL2-IT-3", type:"write", skill:"Write sentences with It (Use the cues).",
+        prompt:"3) about 120 km / Ho Chi Minh City / Vung Tau",
+        answer:"It is about 120 km from Ho Chi Minh City to Vung Tau.",
+        explain:"Keep 'about' when the distance is approximate.",
+        vi:"It is about 120 km from Ho Chi Minh City to Vung Tau. (Khoảng 120km từ TP.HCM đến Vũng Tàu).",
+        data:{hintEN:"It is about ... km from ... to ..."} },
+
+      { id:"CL2-IT-4", type:"write", skill:"Write sentences with It (Use the cues).",
+        prompt:"4) 384,400 km / the Earth / the Moon",
+        answer:"It is about 384,400 km from the Earth to the Moon.",
+        explain:"Scientific distance can still use the same pattern.",
+        vi:"It is about 384,400 km from the Earth to the Moon. (Khoảng 384.400km từ Trái Đất đến Mặt Trăng).",
+        data:{hintEN:"It is about ... km from ... to ..."} },
+
+      { id:"CL2-IT-5", type:"write", skill:"Write sentences with It (Use the cues).",
+        prompt:"5) not very far / Ha Noi centre / Noi Bai Airport",
+        answer:"It is not very far from Ha Noi centre to Noi Bai Airport.",
+        explain:"Negative: It is not very far from A to B.",
+        vi:"It is not very far from Ha Noi centre to Noi Bai Airport. (Không quá xa từ trung tâm Hà Nội đến sân bay Nội Bài).",
+        data:{hintEN:"It is not very far from ... to ..."} },
+
+      { id:"CL2-SS-1", type:"mcq", skill:"Should / shouldn’t: Choose the correct option.",
+        prompt:"1) That’s an interesting book. You (should / shouldn’t) read it.",
+        choices:["should","shouldn’t"],
+        answer:"should",
+        explain:"'Should' gives advice: you are recommended to read it.",
+        vi:"Đó là cuốn sách thú vị. Bạn (nên/không nên) đọc. → should (nên)."},
+      { id:"CL2-SS-2", type:"mcq", skill:"Should / shouldn’t: Choose the correct option.",
+        prompt:"2) You nearly fell off your bike! You really (should / shouldn’t) be more careful.",
+        choices:["should","shouldn’t"],
+        answer:"should",
+        explain:"Nearly fell → need advice to be more careful.",
+        vi:"Bạn suýt ngã khỏi xe đạp! Bạn thật sự (nên/không nên) cẩn thận hơn. → should."},
+      { id:"CL2-SS-3", type:"mcq", skill:"Should / shouldn’t: Choose the correct option.",
+        prompt:"3) We (should / shouldn’t) go swimming right after eating.",
+        choices:["should","shouldn’t"],
+        answer:"shouldn’t",
+        explain:"Right after eating is not a good idea → negative advice.",
+        vi:"Chúng ta (nên/không nên) bơi ngay sau khi ăn. → shouldn’t."},
+      { id:"CL2-SS-4", type:"mcq", skill:"Should / shouldn’t: Choose the correct option.",
+        prompt:"4) I think that he (should / shouldn’t) eat less. He’s becoming overweight.",
+        choices:["should","shouldn’t"],
+        answer:"should",
+        explain:"Overweight → advice: eat less.",
+        vi:"Mình nghĩ anh ấy (nên/không nên) ăn ít lại. Anh ấy đang thừa cân. → should."},
+      { id:"CL2-SS-5", type:"mcq", skill:"Should / shouldn’t: Choose the correct option.",
+        prompt:"5) There are a lot of cars out today. He (should / shouldn’t) drive so fast.",
+        choices:["should","shouldn’t"],
+        answer:"shouldn’t",
+        explain:"Many cars → don’t drive fast (negative advice).",
+        vi:"Hôm nay nhiều xe. Anh ấy (nên/không nên) lái nhanh như vậy. → shouldn’t."},
+
+      { id:"CL2-4-1", type:"fill", skill:"Complete each sentence using should / shouldn’t.",
+        prompt:"1) We ______ ride our motorbikes very fast in the rain.",
+        answer:"shouldn’t",
+        explain:"Rainy → unsafe → shouldn’t.",
+        vi:"Chúng ta ______ chạy xe máy rất nhanh khi trời mưa. → shouldn’t."},
+      { id:"CL2-4-2", type:"fill", skill:"Complete each sentence using should / shouldn’t.",
+        prompt:"2) You ______ study instead of watching YouTube.",
+        answer:"should",
+        explain:"Advice: study instead.",
+        vi:"Bạn ______ học thay vì xem YouTube. → should."},
+      { id:"CL2-4-3", type:"fill", skill:"Complete each sentence using should / shouldn’t.",
+        prompt:"3) My little sister ______ play outside late at night.",
+        answer:"shouldn’t",
+        explain:"Late at night → not safe.",
+        vi:"Em gái tôi ______ chơi bên ngoài vào đêm muộn. → shouldn’t."},
+      { id:"CL2-4-4", type:"fill", skill:"Complete each sentence using should / shouldn’t.",
+        prompt:"4) You ______ help your mum wash the dishes after dinner.",
+        answer:"should",
+        explain:"Advice/ responsibility.",
+        vi:"Bạn ______ giúp mẹ rửa bát sau bữa tối. → should."},
+      { id:"CL2-4-5", type:"fill", skill:"Complete each sentence using should / shouldn’t.",
+        prompt:"5) You look tired. You ______ probably get some sleep.",
+        answer:"should",
+        explain:"Tired → advice: get some sleep.",
+        vi:"Bạn trông mệt. Bạn ______ có lẽ nên ngủ một chút. → should."},
+      { id:"CL2-4-6", type:"fill", skill:"Complete each sentence using should / shouldn’t.",
+        prompt:"6) The children ______ eat so much ice cream.",
+        answer:"shouldn’t",
+        explain:"Too much ice cream is not good.",
+        vi:"Trẻ con ______ ăn quá nhiều kem. → shouldn’t."},
+
+      { id:"CL2-5-1", type:"write", skill:"Look at the pictures. Make sentences using should/shouldn’t and the cues.",
+        prompt:"1) waste water",
+        answer:["We shouldn’t waste water.","You shouldn’t waste water."],
+        explain:"Negative advice with shouldn’t.",
+        vi:"Không nên lãng phí nước. → We/You shouldn’t waste water.",
+        data:{hintEN:"(We/You) shouldn’t ...", sampleEN:"We shouldn’t waste water.", sampleVI:"Chúng ta không nên lãng phí nước."}},
+      { id:"CL2-5-2", type:"write", skill:"Look at the pictures. Make sentences using should/shouldn’t and the cues.",
+        prompt:"2) wear their helmets",
+        answer:["They should wear their helmets.","We should wear our helmets."],
+        explain:"Safety advice: should.",
+        vi:"Nên đội mũ bảo hiểm. → They should wear their helmets.",
+        data:{hintEN:"They should ...", sampleEN:"They should wear their helmets.", sampleVI:"Họ nên đội mũ bảo hiểm."}},
+      { id:"CL2-5-3", type:"write", skill:"Look at the pictures. Make sentences using should/shouldn’t and the cues.",
+        prompt:"3) be more careful",
+        answer:["She should be more careful.","He should be more careful.","We should be more careful."],
+        explain:"Advice: should be more careful.",
+        vi:"Nên cẩn thận hơn. → should be more careful.",
+        data:{hintEN:"(He/She/We) should be more careful.", sampleEN:"She should be more careful.", sampleVI:"Cô ấy nên cẩn thận hơn."}},
+      { id:"CL2-5-4", type:"write", skill:"Look at the pictures. Make sentences using should/shouldn’t and the cues.",
+        prompt:"4) play football on the pavement",
+        answer:["They shouldn’t play football on the pavement.","We shouldn’t play football on the pavement."],
+        explain:"Pavement/sidewalk is unsafe for playing football.",
+        vi:"Không nên đá bóng trên vỉa hè. → shouldn’t.",
+        data:{hintEN:"They shouldn’t ...", sampleEN:"They shouldn’t play football on the pavement.", demonstrate:1}},
+      { id:"CL2-5-5", type:"write", skill:"Look at the pictures. Make sentences using should/shouldn’t and the cues.",
+        prompt:"5) ride their bikes dangerously",
+        answer:["They shouldn’t ride their bikes dangerously.","We shouldn’t ride our bikes dangerously."],
+        explain:"Dangerous riding is not safe.",
+        vi:"Không nên đạp xe nguy hiểm. → shouldn’t.",
+        data:{hintEN:"They shouldn’t ...", sampleEN:"They shouldn’t ride their bikes dangerously.", sampleVI:"Họ không nên đạp xe nguy hiểm."}}
+    ]
+  },
+
+  {
+    key:"LIS",
+    title:"SKILLS — LISTENING (KHUNG)",
+    sub:"Nạp audio offline + làm câu nghe • (Thiếu Activity 3 trong ảnh bạn gửi)",
+    items:[
+      { id:"LIS-0", type:"listening", skill:"Listening",
+        prompt:"Nạp file nghe Unit 7 (mp3/m4a) để học sinh nghe offline.",
+        vi:"Nạp audio để làm phần nghe (offline).",
+        data:{ audioId:"U7_LISTENING_AUDIO_1" } },
+
+      { id:"LIS-4", type:"info", skill:"From the page you sent (Activity 4–5)",
+        prompt:"Listen and check your answers in 3. Then listen again and complete the sentence with no more than THREE words.",
+        vi:"Nghe và kiểm tra đáp án ở bài 3. Sau đó nghe lại và hoàn thành câu với không quá 3 từ.",
+        data:{} },
+
+      { id:"LIS-4-1", type:"fill", skill:"Listening (placeholder)",
+        prompt:"One explanation is that some countries use ______ as the UK.  [CẦN TRANG/ AUDIO]",
+        answer:"[CẦN TRANG/ AUDIO]",
+        explain:"Thiếu dữ liệu Activity 3 + audio trong ảnh hiện tại.",
+        vi:"Thiếu trang bài 3 và audio: bạn gửi thêm để điền chính xác."},
+
+      { id:"LIS-4-2", type:"info", skill:"Reading/Discussion (Activity 5)",
+        prompt:"Read the strange driving rules below. Work in groups. Which one do you think is the strangest?",
+        vi:"Đọc các luật lái xe lạ. Thảo luận: luật nào lạ nhất?",
+        data:{} },
+
+      { id:"LIS-5-1", type:"mcq", skill:"Check understanding of the strange driving rules",
+        prompt:"In Alaska, you are (allowed / not allowed) to drive with a dog on the roof of your car.",
+        choices:["allowed","not allowed"],
+        answer:"not allowed",
+        explain:"The rule says: “you are not allowed to drive with a dog on the roof of your car.”",
+        vi:"Ở Alaska, bạn (được phép/không được phép) lái xe khi có chó trên nóc xe. → not allowed."},
+
+      { id:"LIS-5-2", type:"mcq", skill:"Check understanding of the strange driving rules",
+        prompt:"In Switzerland, you (can / can’t) wash your car on Sunday.",
+        choices:["can","can’t"],
+        answer:"can’t",
+        explain:"The rule says: “you can’t wash your car on Sunday.”",
+        vi:"Ở Thụy Sĩ, bạn (có thể/không thể) rửa xe vào Chủ nhật. → can’t."},
+
+      { id:"LIS-5-3", type:"mcq", skill:"Check understanding of the strange driving rules",
+        prompt:"In Wisconsin, USA, you must always ride your bike with your hands on the ______.",
+        choices:["handlebars","headlights","seatbelts"],
+        answer:"handlebars",
+        explain:"The rule says: “with your hands on the handlebars.”",
+        vi:"Ở Wisconsin (Mỹ), bạn phải luôn đạp xe với tay đặt trên _____. → handlebars (tay lái)."}
+    ]
+  },
+
+  {
+    key:"SK1",
+    title:"SKILLS 1 — READING / SPEAKING",
+    sub:"Traffic rules • Road safety",
+    items:[
+      { id:"SK1-1", type:"info", skill:"Reading",
+        prompt:"Look at the picture. Can you see anything that is dangerous? (Trả lời tự do, không tính điểm)",
+        vi:"Nhìn tranh. Em thấy điều gì nguy hiểm không? (Trả lời tự do)",
+        data:{} },
+
+      { id:"SK1-2", type:"mcq", skill:"Read the following text and choose the correct answer.",
+        prompt:"This text is about ______ .",
+        choices:["rules for pedestrians","traffic lights","traffic rules"],
+        answer:"traffic rules",
+        explain:"The text lists rules for pedestrians, cyclists, passengers → traffic rules.",
+        vi:"Bài đọc nói về _____. → traffic rules (luật giao thông)."},
+
+      { id:"SK1-TEXT", type:"info", skill:"Text (EN + VI)",
+        prompt:"Read the text (Traffic rules).",
+        vi:"Đọc đoạn văn (Luật giao thông).",
+        data:{
+          textEN:
+`These are some rules about road safety. It is important to obey these rules when you are a road user.
+
+Pedestrians
+1. Always look carefully when you cross the street.
+2. Use the pavement or footpath.
+3. Walk across the street at the zebra crossing.
+4. Don’t cross the road on a red light.
+
+Cyclists
+1. Always keep both hands on the handlebars.
+2. Wear helmets, and always use the cycle lane.
+3. Give a signal before you turn.
+4. Don’t carry more than one passenger.
+
+Passengers
+1. Fasten your seatbelt when you are in a car.
+2. Wait for buses to fully stop before getting on or off.
+3. Don’t talk to the driver when he / she is driving.
+4. Don’t stick any body parts out of the window of a moving vehicle.`,
+          textVI:
+`Đây là một số quy tắc về an toàn giao thông. Khi là người tham gia giao thông, em cần tuân thủ các quy tắc này.
+
+Người đi bộ
+1. Luôn quan sát cẩn thận khi băng qua đường.
+2. Đi trên vỉa hè/đường dành cho người đi bộ.
+3. Băng qua đường tại vạch qua đường (zebra crossing).
+4. Không băng qua đường khi đèn đỏ.
+
+Người đi xe đạp
+1. Luôn giữ cả hai tay trên tay lái.
+2. Đội mũ bảo hiểm và luôn đi đúng làn xe đạp.
+3. Ra tín hiệu trước khi rẽ.
+4. Không chở quá một người.
+
+Hành khách
+1. Thắt dây an toàn khi ngồi trong ô tô.
+2. Chờ xe buýt dừng hẳn rồi mới lên/xuống.
+3. Không nói chuyện làm phân tâm người lái xe.
+4. Không thò bất kỳ bộ phận nào ra ngoài cửa sổ khi xe đang chạy.`
+        }
+      },
+
+      { id:"SK1-3-1", type:"fill", skill:"Read the text again and answer the questions.",
+        prompt:"1) Where should pedestrians cross the street?",
+        answer:"at the zebra crossing",
+        explain:"Pedestrians rule #3: walk across at the zebra crossing.",
+        vi:"Người đi bộ nên qua đường ở đâu? → at the zebra crossing (vạch qua đường)."},
+      { id:"SK1-3-2", type:"fill", skill:"Read the text again and answer the questions.",
+        prompt:"2) Which lane should you use when riding a bike?",
+        answer:"the cycle lane",
+        explain:"Cyclists rule #2: always use the cycle lane.",
+        vi:"Đi xe đạp nên đi làn nào? → the cycle lane (làn xe đạp)."},
+      { id:"SK1-3-3", type:"fill", skill:"Read the text again and answer the questions.",
+        prompt:"3) What should you do before you turn while riding a bike?",
+        answer:"give a signal",
+        explain:"Cyclists rule #3: give a signal before you turn.",
+        vi:"Trước khi rẽ khi đi xe đạp, em nên làm gì? → give a signal (ra tín hiệu)."},
+      { id:"SK1-3-4", type:"fill", skill:"Read the text again and answer the questions.",
+        prompt:"4) What must you do when you get on or off a bus?",
+        answer:"wait for it to fully stop",
+        explain:"Passengers rule #2: wait for buses to fully stop.",
+        vi:"Khi lên/xuống xe buýt, em phải làm gì? → wait for it to fully stop (chờ dừng hẳn)."},
+      { id:"SK1-3-5", type:"fill", skill:"Read the text again and answer the questions.",
+        prompt:"5) What mustn’t you do when you are in a moving vehicle?",
+        answer:"stick any body parts out of the window",
+        explain:"Passengers rule #4: don’t stick body parts out of the window.",
+        vi:"Khi xe đang chạy, em không được làm gì? → stick body parts out of the window (thò tay/chân ra ngoài)."}
+      ,
+
+      { id:"SK1-4", type:"info", skill:"Speaking",
+        prompt:"Work in groups. Ask and answer: When you are a road user, what should YOU NOT do?",
+        vi:"Làm việc nhóm: Khi tham gia giao thông, em KHÔNG nên làm gì?",
+        data:{} },
+
+      { id:"SK1-5", type:"mcq", skill:"Discuss: who is being safe?",
+        prompt:"1) Hoang is riding a bike, and he is wearing a helmet.",
+        choices:["safe","not safe"],
+        answer:"safe",
+        explain:"Wearing a helmet is safe.",
+        vi:"Hoàng đi xe đạp và đội mũ bảo hiểm → an toàn."},
+      { id:"SK1-5-2", type:"mcq", skill:"Discuss: who is being safe?",
+        prompt:"2) It is raining hard, but Mr Long is driving quickly.",
+        choices:["safe","not safe"],
+        answer:"not safe",
+        explain:"Driving fast in heavy rain is dangerous.",
+        vi:"Trời mưa to mà lái nhanh → không an toàn."},
+      { id:"SK1-5-3", type:"mcq", skill:"Discuss: who is being safe?",
+        prompt:"3) The students are standing in a line to get on the school bus.",
+        choices:["safe","not safe"],
+        answer:"safe",
+        explain:"Standing in a line is orderly and safe.",
+        vi:"Xếp hàng lên xe buýt → an toàn."},
+      { id:"SK1-5-4", type:"mcq", skill:"Discuss: who is being safe?",
+        prompt:"4) Mr Binh is taking his daughter to school on his motorbike. She is sitting in front of him.",
+        choices:["safe","not safe"],
+        answer:"not safe",
+        explain:"A child sitting in front can be unsafe; child should be secured and wear a helmet.",
+        vi:"Chở con ngồi phía trước xe máy → không an toàn."},
+      { id:"SK1-5-5", type:"mcq", skill:"Discuss: who is being safe?",
+        prompt:"5) Michelle is cycling to school and she is waving and shouting to her friends.",
+        choices:["safe","not safe"],
+        answer:"not safe",
+        explain:"Waving/shouting can distract and cause accidents.",
+        vi:"Vừa đạp xe vừa vẫy tay, la hét → không an toàn."}
+    ]
+  },
+
+  {
+    key:"LB",
+    title:"LOOKING BACK",
+    sub:"Vocabulary + Grammar",
+    items:[
+      { id:"LB-1", type:"info", skill:"Vocabulary",
+        prompt:"Label each sign. (Dùng icon thay thế)",
+        vi:"Gọi tên các biển báo (dùng icon thay thế).",
+        data:{} },
+
+      { id:"LB-1-1", type:"fill", skill:"Vocabulary: Signs",
+        prompt:"1) 🚦 (red light sign)",
+        answer:"Traffic lights",
+        explain:"Traffic lights = đèn giao thông.",
+        vi:"1) 🚦 → Traffic lights."},
+      { id:"LB-1-2", type:"fill", skill:"Vocabulary: Signs",
+        prompt:"2) 🏫➡️",
+        answer:"School ahead",
+        explain:"School ahead = phía trước có trường.",
+        vi:"2) 🏫➡️ → School ahead."},
+      { id:"LB-1-3", type:"fill", skill:"Vocabulary: Signs",
+        prompt:"3) 🏥➡️",
+        answer:"Hospital ahead",
+        explain:"Hospital ahead = phía trước có bệnh viện.",
+        vi:"3) 🏥➡️ → Hospital ahead."},
+      { id:"LB-1-4", type:"fill", skill:"Vocabulary: Signs",
+        prompt:"4) 🚲🛣️",
+        answer:"Cycle lane",
+        explain:"Cycle lane = làn xe đạp.",
+        vi:"4) 🚲🛣️ → Cycle lane."},
+      { id:"LB-1-5", type:"fill", skill:"Vocabulary: Signs",
+        prompt:"5) ↪️🚫",
+        answer:"No right turn",
+        explain:"No right turn = cấm rẽ phải.",
+        vi:"5) ↪️🚫 → No right turn."},
+      { id:"LB-1-6", type:"fill", skill:"Vocabulary: Signs",
+        prompt:"6) 🚲🚫",
+        answer:"No cycling",
+        explain:"No cycling = cấm xe đạp.",
+        vi:"6) 🚲🚫 → No cycling."},
+
+      { id:"LB-2-1", type:"fill", skill:"Fill in each gap with one word.",
+        prompt:"1) A road ______ is anyone who uses a road, such as a pedestrian, cyclist or motorist.",
+        answer:"user",
+        explain:"Road user = người tham gia giao thông.",
+        vi:"1) A road ______ … → user."},
+      { id:"LB-2-2", type:"fill", skill:"Fill in each gap with one word.",
+        prompt:"2) Does your dad ______ his motorbike carefully?",
+        answer:"ride",
+        explain:"We ride a motorbike/bike.",
+        vi:"2) Does your dad ______ … → ride."},
+      { id:"LB-2-3", type:"fill", skill:"Fill in each gap with one word.",
+        prompt:"3) A ______ is a person travelling in a car, bus, train, … but not driving.",
+        answer:"passenger",
+        explain:"Passenger = hành khách.",
+        vi:"3) A ______ … → passenger."},
+      { id:"LB-2-4", type:"fill", skill:"Fill in each gap with one word.",
+        prompt:"4) My cousin wants to become a pilot. He is learning to ______ planes.",
+        answer:"fly",
+        explain:"Pilots fly planes.",
+        vi:"4) learning to ______ planes → fly."},
+      { id:"LB-2-5", type:"fill", skill:"Fill in each gap with one word.",
+        prompt:"5) We should be careful when the ______ light is yellow.",
+        answer:"traffic",
+        explain:"Traffic light = đèn giao thông.",
+        vi:"5) the ______ light → traffic."},
+
+      { id:"LB-3-1", type:"write", skill:"Grammar: It indicating distance (Write complete sentences).",
+        prompt:"1) over 100 km / my home town / Ho Chi Minh City",
+        answer:"It is over 100 km from my home town to Ho Chi Minh City.",
+        explain:"It + be + distance + from A + to B.",
+        vi:"It is over 100 km from my home town to Ho Chi Minh City. (Hơn 100km từ quê tôi đến TP.HCM).",
+        data:{hintEN:"It is ... km from ... to ..."} },
+      { id:"LB-3-2", type:"write", skill:"Grammar: It indicating distance (Write complete sentences).",
+        prompt:"2) about 25 km / here / my grandparents’ house",
+        answer:"It is about 25 km from here to my grandparents’ house.",
+        explain:"Use 'from here to ...' when starting point is here.",
+        vi:"It is about 25 km from here to my grandparents’ house. (Khoảng 25km từ đây đến nhà ông bà).",
+        data:{hintEN:"It is about ... km from here to ..."} },
+      { id:"LB-3-3", type:"write", skill:"Grammar: It indicating distance (Write complete sentences).",
+        prompt:"3) not very far / our school / the city museum",
+        answer:"It is not very far from our school to the city museum.",
+        explain:"Negative distance: not very far.",
+        vi:"It is not very far from our school to the city museum. (Không xa từ trường đến bảo tàng thành phố).",
+        data:{hintEN:"It is not very far from ... to ..."} },
+      { id:"LB-3-4", type:"write", skill:"Grammar: It indicating distance (Write complete sentences).",
+        prompt:"4) how far / your house / the gym?",
+        answer:"How far is it from your house to the gym?",
+        explain:"Question form: How far is it from A to B?",
+        vi:"How far is it from your house to the gym? (Từ nhà bạn đến phòng gym xa bao nhiêu?)",
+        data:{hintEN:"How far is it from ... to ...?"} },
+      { id:"LB-3-5", type:"write", skill:"Grammar: It indicating distance (Write complete sentences).",
+        prompt:"5) it / a long distance / Ha Noi / Ban Gioc Waterfall!",
+        answer:"It is a long distance from Ha Noi to Ban Gioc Waterfall!",
+        explain:"It is + noun phrase (a long distance).",
+        vi:"It is a long distance from Ha Noi to Ban Gioc Waterfall! (Từ Hà Nội đến thác Bản Giốc rất xa!).",
+        data:{hintEN:"It is a long distance from ... to ...!"} },
+
+      { id:"LB-4-1", type:"mcq", skill:"Choose A, B, or C to complete the sentences.",
+        prompt:"1) You ______ put the rubbish in the waste bins over there.",
+        choices:["should","would","shouldn’t"],
+        answer:"should",
+        explain:"Advice: you should put the rubbish in bins.",
+        vi:"Bạn ______ bỏ rác vào thùng. → should."},
+      { id:"LB-4-2", type:"mcq", skill:"Choose A, B, or C to complete the sentences.",
+        prompt:"2) You ______ be over eighteen to ride a motorbike.",
+        choices:["would","must","could"],
+        answer:"must",
+        explain:"Rule/obligation: must.",
+        vi:"Bạn ______ trên 18 tuổi để lái xe máy. → must."},
+      { id:"LB-4-3", type:"mcq", skill:"Choose A, B, or C to complete the sentences.",
+        prompt:"3) Children ______ ride their bikes too fast.",
+        choices:["mightn’t","wouldn’t","shouldn’t"],
+        answer:"shouldn’t",
+        explain:"Advice: children shouldn’t ride too fast.",
+        vi:"Trẻ em ______ đạp xe quá nhanh. → shouldn’t."},
+      { id:"LB-4-4", type:"mcq", skill:"Choose A, B, or C to complete the sentences.",
+        prompt:"4) I am a bit lost. ______ you help me, please?",
+        choices:["Could","Should","Might"],
+        answer:"Could",
+        explain:"Polite request: Could you…?",
+        vi:"Mình hơi lạc. ______ bạn giúp mình được không? → Could."},
+      { id:"LB-4-5", type:"mcq", skill:"Choose A, B, or C to complete the sentences.",
+        prompt:"5) You ______ eat so many cookies. Too much sugar is bad for you.",
+        choices:["couldn’t","wouldn’t","shouldn’t"],
+        answer:"shouldn’t",
+        explain:"Advice: shouldn’t eat too many cookies.",
+        vi:"Bạn ______ ăn nhiều bánh quy như vậy. → shouldn’t."},
+      { id:"LB-4-6", type:"mcq", skill:"Choose A, B, or C to complete the sentences.",
+        prompt:"6) This is a big park. You ______ run or cycle here.",
+        choices:["should","can","could"],
+        answer:"can",
+        explain:"Permission/ability: can.",
+        vi:"Đây là công viên lớn. Bạn ______ chạy hoặc đạp xe ở đây. → can."}
+    ]
+  }
+];
+
+/* =========================
+   2) STATE
+========================= */
+const state = {
+  screenIndex: 0,
+  startTs: null,
+  elapsedSec: 0,
+  answers: {},     // qid -> value or object
+  submitted: {},   // key -> true
+  showExplain: {}, // key -> bool
+  showAnswers: {}, // key -> bool
+  teacherMode: false
+};
+
+/* =========================
+   3) UTIL
+========================= */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast._tm);
+  toast._tm=setTimeout(()=>t.classList.remove("show"),2300);
+}
+function fmtTime(sec){
+  sec=Math.max(0,Math.floor(sec));
+  const m=String(Math.floor(sec/60)).padStart(2,"0");
+  const s=String(sec%60).padStart(2,"0");
+  return `${m}:${s}`;
+}
+function normText(s){ return String(s??"").trim().toLowerCase().replace(/\s+/g," "); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
+function escAttr(s){ return esc(s).replace(/"/g,"&quot;"); }
+
+function loadJSON(key, fallback){
+  try{ const raw=localStorage.getItem(key); return raw? JSON.parse(raw): fallback; }catch(e){ return fallback; }
+}
+function saveJSON(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
+
+function loadState(){
+  const s=loadJSON(LS_STATE, null);
+  if(!s) return;
+  Object.assign(state, s);
+}
+function saveState(silent=true){
+  saveJSON(LS_STATE, state);
+  if(!silent) toast("Đã lưu tiến độ.");
+}
+function resetAll(){
+  localStorage.removeItem(LS_STATE);
+  localStorage.removeItem(LS_SHUF);
+  // localStorage.removeItem(LS_AUDIO); // nếu muốn xóa audio đã nạp
+  location.reload();
+}
+
+/* =========================
+   4) SHUFFLE (không cố định vị trí đáp án đúng)
+========================= */
+function fyShuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function getShuffleMap(){ return loadJSON(LS_SHUF, {}); }
+function setShuffleMap(m){ saveJSON(LS_SHUF, m||{}); }
+
+function getShuffledChoices(q){
+  const base = (q.choices||[]);
+  const shuf=getShuffleMap();
+  if(!shuf[q.id]){
+    shuf[q.id]=fyShuffle(base);
+    setShuffleMap(shuf);
+  }
+  const saved=shuf[q.id];
+  const sameSet = saved.length===base.length && saved.every(x=>base.includes(x));
+  if(!sameSet){
+    shuf[q.id]=fyShuffle(base);
+    setShuffleMap(shuf);
+  }
+  return shuf[q.id];
+}
+function resetShuffleForScreen(screen){
+  const shuf=getShuffleMap();
+  for(const q of (screen.items||[])){
+    if(shuf[q.id]) delete shuf[q.id];
+  }
+  setShuffleMap(shuf);
+}
+
+/* =========================
+   5) AUDIO PACK for Listening (offline)
+========================= */
+function getAudioPack(){ return loadJSON(LS_AUDIO, {}); }
+function setAudioPack(p){ saveJSON(LS_AUDIO, p||{}); }
+
+function base64ToBlob(base64, mime){
+  const binStr = atob(base64);
+  const len=binStr.length;
+  const bytes=new Uint8Array(len);
+  for(let i=0;i<len;i++) bytes[i]=binStr.charCodeAt(i);
+  return new Blob([bytes], {type:mime||"audio/mpeg"});
+}
+function resolveAudioSrc(audioId){
+  if(!audioId) return null;
+  const pack=getAudioPack();
+  if(pack[audioId]?.base64){
+    const {mime, base64}=pack[audioId];
+    return URL.createObjectURL(base64ToBlob(base64, mime));
+  }
+  return null;
+}
+async function loadAudioFromFile(audioId, file){
+  const mime=file.type||"audio/mpeg";
+  const buf=await file.arrayBuffer();
+  const bytes=new Uint8Array(buf);
+  let bin="";
+  const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    bin += String.fromCharCode(...bytes.subarray(i,i+chunk));
+  }
+  const base64=btoa(bin);
+  const pack=getAudioPack();
+  pack[audioId]={mime, base64};
+  setAudioPack(pack);
+}
+
+/* =========================
+   6) MUSIC (WebAudio) — OFFLINE
+========================= */
+let bg={ctx:null, master:null, isOn:true, vol:0.35, oscA:null, oscB:null, lfo:null, lfoGain:null};
+function loadMusic(){
+  const p=loadJSON(LS_MUSIC, {});
+  if(typeof p.isOn==="boolean") bg.isOn=p.isOn;
+  if(typeof p.vol==="number") bg.vol=Math.min(1,Math.max(0,p.vol));
+}
+function saveMusic(){ saveJSON(LS_MUSIC, {isOn:bg.isOn, vol:bg.vol}); }
+function ensureMusic(){
+  if(bg.ctx) return;
+  const AC=window.AudioContext||window.webkitAudioContext;
+  bg.ctx=new AC();
+  bg.master=bg.ctx.createGain();
+  bg.master.gain.value=bg.isOn?bg.vol:0;
+  bg.master.connect(bg.ctx.destination);
+
+  bg.oscA=bg.ctx.createOscillator(); bg.oscB=bg.ctx.createOscillator();
+  bg.oscA.type="triangle"; bg.oscB.type="sine";
+  bg.oscA.frequency.value=220; bg.oscB.frequency.value=330;
+  const gA=bg.ctx.createGain(); gA.gain.value=0.08;
+  const gB=bg.ctx.createGain(); gB.gain.value=0.06;
+
+  bg.lfo=bg.ctx.createOscillator(); bg.lfo.type="sine"; bg.lfo.frequency.value=0.6;
+  bg.lfoGain=bg.ctx.createGain(); bg.lfoGain.gain.value=15;
+  bg.lfo.connect(bg.lfoGain); bg.lfoGain.connect(bg.oscA.frequency);
+
+  const filter=bg.ctx.createBiquadFilter(); filter.type="lowpass"; filter.frequency.value=900;
+
+  bg.oscA.connect(gA); gA.connect(filter);
+  bg.oscB.connect(gB); gB.connect(filter);
+  filter.connect(bg.master);
+
+  bg.oscA.start(); bg.oscB.start(); bg.lfo.start();
+
+  let step=0;
+  setInterval(()=>{
+    if(!bg.ctx) return;
+    const seq=[[220,330],[246.94,370],[196,293.66],[220,329.63]];
+    const [f1,f2]=seq[step%seq.length]; step++;
+    try{
+      bg.oscA.frequency.setTargetAtTime(f1, bg.ctx.currentTime, 0.08);
+      bg.oscB.frequency.setTargetAtTime(f2, bg.ctx.currentTime, 0.08);
+    }catch(e){}
+  },1800);
+}
+function updateMusicUI(){
+  document.getElementById("btnMusic").textContent=`Nhạc: ${bg.isOn?"ON":"OFF"}`;
+  document.getElementById("vol").value=Math.round(bg.vol*100);
+}
+function setMusic(on){
+  bg.isOn=on; ensureMusic();
+  bg.master.gain.value = bg.isOn?bg.vol:0;
+  saveMusic(); updateMusicUI();
+}
+function setVol(v01){
+  bg.vol=Math.min(1,Math.max(0,v01)); ensureMusic();
+  bg.master.gain.value = bg.isOn?bg.vol:0;
+  saveMusic(); updateMusicUI();
+}
+
+/* =========================
+   7) SCORING
+========================= */
+function allQuestions(){
+  const out=[];
+  CONTENT.forEach(screen => (screen.items||[]).forEach(q => {
+    if(q.type!=="info" && q.type!=="listening") out.push({screenKey:screen.key, ...q});
+  }));
+  return out;
+}
+function scoreOne(q, ua){
+  if(ua==null || String(ua).trim()==="") return {answered:false, correct:false, point:0};
+  if(q.type==="mcq"){
+    const ok = normText(ua)===normText(q.answer);
+    return {answered:true, correct:ok, point: ok?1:0};
+  }
+  if(q.type==="fill"){
+    // nếu đáp án placeholder thì không chấm
+    if(String(q.answer).includes("[CẦN")) return {answered:true, correct:true, point:0};
+    const ok = normText(ua)===normText(q.answer);
+    return {answered:true, correct:ok, point: ok?1:0};
+  }
+  if(q.type==="write"){
+    const list = Array.isArray(q.answer)? q.answer : [q.answer];
+    const u=normText(ua);
+    const ok = list.filter(Boolean).some(s=>u===normText(s));
+    return {answered:true, correct:ok, point: ok?1:0};
+  }
+  if(q.type==="match"){
+    const ans=q.answer||{};
+    const u=(typeof ua==="object" && ua)?ua:{};
+    const keys=Object.keys(ans);
+    if(!keys.length) return {answered:false, correct:false, point:0};
+    const ok=keys.every(k=>String(u[k]||"").trim()===String(ans[k]).trim());
+    return {answered:true, correct:ok, point: ok?1:0};
+  }
+  return {answered:false, correct:false, point:0};
+}
+function totals(){
+  const qs=allQuestions();
+  let correct=0, wrong=0, points=0, answered=0;
+  qs.forEach(q=>{
+    const ua=state.answers[q.id];
+    const s=scoreOne(q, ua);
+    if(s.answered) answered++;
+    if(s.correct) correct++; else if(s.answered) wrong++;
+    points += s.point;
+  });
+  const totalQ = qs.length;
+  const pct = totalQ? Math.round(correct/totalQ*100):0;
+  const done = totalQ? Math.round(answered/totalQ*100):0;
+  return {correct, wrong, points, totalQ, pct, done};
+}
+
+/* =========================
+   8) RENDER
+========================= */
+function renderNav(){
+  const nav=document.getElementById("nav");
+  nav.innerHTML="";
+  CONTENT.forEach((sec,i)=>{
+    const done = !!state.submitted[sec.key];
+    explaining = !!state.showExplain[sec.key];
+    const div=document.createElement("div");
+    div.className="navItem"+(i===state.screenIndex?" active":"");
+    div.innerHTML=`
+      <div>
+        <div style="font-weight:900">${esc(sec.title)}</div>
+        <div class="small">${esc(sec.key)} • ${done?"Đã nộp":"Chưa nộp"}</div>
+      </div>
+      <div class="badge">${i+1}/${CONTENT.length}</div>
+    `;
+    div.onclick=()=>{ state.screenIndex=i; saveState(true); render(); window.scrollTo({top:0,behavior:"smooth"}); };
+    nav.appendChild(div);
+  });
+}
+function renderKPI(){
+  const t=totals();
+  document.getElementById("kCorrect").textContent=t.correct;
+  document.getElementById("kWrong").textContent=t.wrong;
+  document.getElementById("kPercent").textContent=`${t.pct}%`;
+  document.getElementById("kDone").textContent=`${t.done}%`;
+  document.getElementById("scoreBadge").textContent=`${t.points} điểm`;
+
+  const submittedCount = CONTENT.filter(s=>state.submitted[s.key]).length;
+  const pct = Math.round(submittedCount/CONTENT.length*100);
+  document.getElementById("progressText").textContent=`${submittedCount}/${CONTENT.length} phần • ${pct}%`;
+  document.getElementById("progressBar").style.width=`${pct}%`;
+}
+function render(){
+  renderNav(); renderKPI();
+  const sec=CONTENT[state.screenIndex];
+
+  document.getElementById("sectionTitle").textContent=sec.title;
+  document.getElementById("sectionSub").textContent=sec.sub;
+
+  const submitted=!!state.submitted[sec.key];
+  document.getElementById("btnSubmit").disabled=submitted;
+  document.getElementById("btnSubmit").textContent=submitted?"Đã nộp":"Nộp bài";
+  document.getElementById("btnExplain").textContent=state.showExplain[sec.key]?"Ẩn giải thích":"Giải thích";
+  document.getElementById("btnAnswers").textContent=(state.showAnswers[sec.key]||state.teacherMode)?"Ẩn đáp án":"Xem đáp án";
+
+  const stage=document.getElementById("stage");
+  stage.innerHTML="";
+
+  if(sec.passage){
+    const p=document.createElement("div");
+    p.className="card";
+    p.innerHTML=`
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="min-width:280px;flex:1">
+          <div style="font-weight:900">${esc(sec.passage.title||"Passage")}</div>
+          <div class="small" style="margin-top:10px"><b>EN</b></div>
+          <pre>${esc(sec.passage.textEN||"")}</pre>
+          <div class="small" style="margin-top:10px"><b>VI</b></div>
+          <pre>${esc(sec.passage.textVI||"")}</pre>
+        </div>
+        <div class="badge">${esc(sec.key)}</div>
+      </div>
+    `;
+    stage.appendChild(p);
+    stage.appendChild(document.createElement("div")).style.height="10px";
+  }
+
+  (sec.items||[]).forEach(q=>stage.appendChild(renderQuestion(sec, q)));
+}
+
+function renderQuestion(sec, q){
+  const div=document.createElement("div");
+  div.className="q";
+
+  const submitted=!!state.submitted[sec.key];
+  const showExplain=!!state.showExplain[sec.key];
+  const showAnswers=!!state.showAnswers[sec.key] || state.teacherMode;
+
+  const ua=state.answers[q.id];
+  const sc = (submitted && q.type!=="info" && q.type!=="listening") ? scoreOne(q, ua) : null;
+
+  let badge = (submitted && sc)
+    ? (sc.correct ? `<span class="tag good">ĐÚNG +${sc.point}</span>` : (sc.answered ? `<span class="tag bad">SAI +0</span>` : `<span class="tag">CHƯA TRẢ LỜI</span>`))
+    : `<span class="tag">${esc(q.type.toUpperCase())}</span>`;
+
+  let body="";
+
+  if(q.type==="info"){
+    // custom displays: icons lists
+    if(q.id==="GS-4"){
+      const icons = CONTENT[0].items.find(x=>x.id==="GS-4").data.icons;
+      body += `<div class="gridIcons">` + icons.map(it=>`
+        <div class="iconCard">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+            <div><div class="iconBig">${it.icon}</div><div class="small">${it.labelEN} • ${it.labelVI}</div></div>
+            <div class="badge">#${it.n}</div>
+          </div>
+        </div>
+      `).join("") + `</div>`;
+    }
+    if(q.id==="CL1-2"){
+      const phrases=q.data.phrases||[];
+      const signs=q.data.signs||[];
+      body += `<div class="card" style="margin-top:10px">
+        <div style="font-weight:900">Phrases:</div>
+        <div class="small" style="margin-top:6px">${phrases.map(p=>`<span class="badge" style="margin:2px 6px 0 0;display:inline-block">${esc(p)}</span>`).join("")}</div>
+      </div>`;
+      body += `<div class="gridIcons">` + signs.map(s=>`
+        <div class="iconCard">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+            <div>
+              <div class="iconBig">${s.icon}</div>
+              <div class="small">Hint: ${esc(s.hint)}</div>
+            </div>
+            <div class="badge">${s.n}</div>
+          </div>
+        </div>
+      `).join("") + `</div>`;
+    }
+    if(q.id==="SK1-TEXT"){
+      body += `<div class="card" style="margin-top:10px">
+        <div class="small"><b>EN</b></div>
+        <pre>${esc(q.data.textEN||"")}</pre>
+        <div class="small" style="margin-top:10px"><b>VI</b></div>
+        <pre>${esc(q.data.textVI||"")}</pre>
+      </div>`;
+    }
+    body += `<div class="small" style="margin-top:10px">${esc(q.vi||"")}</div>`;
+  }
+
+  if(q.type==="listening"){
+    const audioId=q.data.audioId;
+    const src=resolveAudioSrc(audioId);
+    body += `
+      <div class="card" style="margin-top:10px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:900">Listening Audio</div>
+            <div class="small">Audio ID: <span class="mono">${esc(audioId)}</span></div>
+          </div>
+          <label class="btn primary" style="display:inline-flex;align-items:center;gap:8px">
+            Nạp audio
+            <input id="file-${escAttr(audioId)}" type="file" accept="audio/*" style="display:none"/>
+          </label>
+        </div>
+        <div id="audioArea-${escAttr(audioId)}" style="margin-top:10px"></div>
+        <details style="margin-top:10px">
+          <summary class="small">Gợi ý transcript</summary>
+          <div class="hr"></div>
+          <div class="note small">Nếu bạn gửi thêm trang Listening (Activity 3) và file audio chuẩn của Unit 7, tôi sẽ điền transcript + câu hỏi nghe đầy đủ.</div>
+        </details>
+      </div>
+    `;
+    // bind after insert
+    setTimeout(()=>{
+      const area=document.getElementById(`audioArea-${audioId}`);
+      if(area){
+        area.innerHTML = src ? `<audio controls preload="metadata" src="${escAttr(src)}"></audio>`
+                             : `<div class="note small">Chưa có audio. Bấm “Nạp audio” để chọn mp3/m4a; hệ thống sẽ lưu offline.</div>`;
+      }
+      const input=document.getElementById(`file-${audioId}`);
+      if(input){
+        const lbl=input.closest("label");
+        if(lbl){
+          lbl.onclick=()=>input.click();
+        }
+        input.onchange=async ()=>{
+          const f=input.files && input.files[0];
+          if(!f) return;
+          await loadAudioFromFile(audioId, f);
+          toast("Đã nạp audio và lưu offline.");
+          render();
+        };
+      }
+    },0);
+  }
+
+  if(q.type==="mcq"){
+    const choices = getShuffledChoices(q);
+    body += `<div class="opts">` + choices.map(c=>{
+      const checked = (ua===c);
+      let cls="opt";
+      if(submitted && showAnswers){
+        if(normText(c)===normText(q.answer)) cls+=" correct";
+        else if(checked && normText(c)!==normText(q.answer)) cls+=" wrong";
+      }
+      return `
+        <label class="${cls}">
+          <input type="radio" name="${q.id}" ${checked?"checked":""} ${submitted?"disabled":""}
+            onchange="setAns('${q.id}', ${JSON.stringify(c)})">
+          <div>${esc(c)}</div>
+        </label>
+      `;
+    }).join("") + `</div>`;
+  }
+
+  if(q.type==="fill"){
+    body += `
+      <div style="margin-top:10px">
+        <input class="inp" value="${escAttr(ua||"")}" ${submitted?"disabled":""}
+          placeholder="Type ONE word / phrase..."
+          oninput="setAns('${q.id}', this.value)">
+      </div>
+    `;
+  }
+
+  if(q.type==="write"){
+    body += `
+      <div class="small" style="margin-top:8px"><b>Gợi ý:</b> ${esc(q.data?.hintEN||"Write a complete sentence.")}</div>
+      <div style="margin-top:10px">
+        <textarea class="inp" style="width:100%;min-height:90px" ${submitted?"disabled":""}
+          placeholder="Write your sentence..."
+          oninput="setAns('${q.id}', this.value)">${esc(ua||"")}</textarea>
+      </div>
+      ${q.data?.sampleEN ? `
+        <details style="margin-top:8px">
+          <summary class="small">Đáp án mẫu (tham khảo)</summary>
+          <div class="small" style="margin-top:8px"><b>EN:</b> ${esc(q.data.sampleEN||"")}</div>
+          <div class="small" style="margin-top:6px"><b>VI:</b> ${esc(q.data.sampleVI||"")}</div>
+        </details>` : "" }
+    `;
+  }
+
+  if(q.type==="match"){
+    const left=q.data.left||[], right=q.data.right||[];
+    const u=(typeof ua==="object" && ua)?ua:{};
+    body += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+      <div class="card"><div style="font-weight:900;margin-bottom:8px">A</div>
+        ${left.map(it=>{
+          const sel=u[it.k]||"";
+          const opts=right.map(r=>`<option value="${escAttr(r.k)}" ${sel===r.k?"selected":""}>${esc(r.k)}. ${esc(r.text)}</option>`).join("");
+          return `
+            <div class="q" style="margin:0 0 8px 0">
+              <div style="font-weight:900">${esc(it.k)}. ${esc(it.text)}</div>
+              <div style="margin-top:8px">
+                <select class="inp" ${submitted?"disabled":""} onchange="setMatch('${q.id}','${it.k}',this.value)">
+                  <option value="">-- chọn --</option>
+                  ${opts}
+                </select>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+      <div class="card"><div style="font-weight:900;margin-bottom:8px">B</div>
+        ${right.map(r=>`<div class="q" style="margin:0 0 8px 0"><b>${esc(r.k)}.</b> ${esc(r.text)}</div>`).join("")}
+      </div>
+    </div>`;
+  }
+
+  const explainBlock = (q.type==="info" || q.type==="listening") ? "" : `
+    <div class="explain ${(submitted && (showExplain || showAnswers)) ? "show":""}">
+      <div class="row"><b>Đáp án:</b> <span class="mono">${esc(formatAnswer(q))}</span></div>
+      <div class="row"><b>Giải thích:</b> ${esc(q.explain || q.vi_explain || "")}</div>
+      <div class="row"><b>Dịch Việt:</b> ${esc(q.vi || "")}</div>
+    </div>
+  `;
+
+  div.innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div>
+        <div class="qTitle">${esc(q.id)} — ${esc(q.prompt)}</div>
+        <div class="small">${esc(q.skill||"")}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">${badge}</div>
+    </div>
+    ${body}
+    ${explainBlock}
+  `;
+  return div;
+}
+
+function formatAnswer(q){
+  if(q.type==="match"){
+    return Object.entries(q.answer||{}).map(([k,v])=>`${k}→${v}`).join(", ");
+  }
+  if(q.type==="write"){
+    const list=Array.isArray(q.answer)?q.answer:[q.answer];
+    return list.filter(Boolean).join(" | ");
+  }
+  return String(q.answer??"");
+}
+
+/* =========================
+   9) ACTIONS
+========================= */
+function setAns(qid, val){
+  state.answers[qid]=val;
+  saveState(true);
+  renderKPI();
+}
+function setMatch(qid, k, v){
+  const cur=(typeof state.answers[qid]==="object" && state.answers[qid])?state.answers[qid]:{};
+  cur[k]=v;
+  state.answers[qid]=cur;
+  saveState(true);
+  renderKPI();
+}
+
+function submitSection(){
+  const sec=CONTENT[state.screenIndex];
+  if(state.submitted[sec.key]) return;
+  state.submitted[sec.key]=true;
+  saveState(true);
+  render();
+  toast("Đã nộp phần này.");
+}
+function retrySection(){
+  const sec=CONTENT[state.screenIndex];
+  (sec.items||[]).forEach(q=>{ delete state.answers[q.id]; });
+  state.submitted[sec.key]=false;
+  state.showExplain[sec.key]=false;
+  state.showAnswers[sec.key]=false;
+  resetShuffleForScreen(sec);
+  saveState(true);
+  render();
+  toast("Đã làm lại phần này (đáp án sẽ xáo trộn lại).");
+}
+function toggleExplain(){
+  const sec=CONTENT[state.screenIndex];
+  state.showExplain[sec.key]=!state.showExplain[sec.key];
+  saveState(true); render();
+}
+function toggleAnswers(){
+  const sec=CONTENT[state.screenIndex];
+  state.showAnswers[sec.key]=!state.showAnswers[sec.key];
+  saveState(true); render();
+}
+function nextSection(){
+  if(state.screenIndex < CONTENT.length-1){
+    state.screenIndex++;
+    saveState(true);
+    render();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }else{
+    exportReport();
+  }
+}
+async function exportReport(){
+  const rep=buildReport();
+  try{
+    await navigator.clipboard.writeText(rep);
+    toast("Đã sao chép báo cáo (Ctrl+V để dán).");
+  }catch(e){
+    const ta=document.createElement("textarea");
+    ta.value=rep; ta.style.position="fixed"; ta.style.left="-9999px";
+    document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+    document.body.removeChild(ta);
+    toast("Đã sao chép báo cáo.");
+  }
+}
+function buildReport(){
+  const t=totals();
+  const submittedCount = CONTENT.filter(s=>state.submitted[s.key]).length;
+  const lines=[];
+  lines.push("BÁO CÁO KẾT QUẢ — GS7 UNIT 7 TRAFFIC");
+  lines.push("-----------------------------------");
+  lines.push(`Thời gian: ${fmtTime(state.elapsedSec)}`);
+  lines.push(`Đã nộp: ${submittedCount}/${CONTENT.length}`);
+  lines.push(`Tổng điểm: ${t.points}/${t.totalQ}`);
+  lines.push(`Đúng: ${t.correct} | Sai: ${t.wrong} | % đúng: ${t.pct}%`);
+  lines.push("");
+  lines.push("Chi tiết:");
+  allQuestions().forEach(q=>{
+    const ua=state.answers[q.id];
+    const s=scoreOne(q, ua);
+    lines.push(`- ${q.id} (${q.type}) ${s.answered?(s.correct?"ĐÚNG":"SAI"):"CHƯA"} | TL: ${String(ua??"")} | ĐA: ${formatAnswer(q)}`);
+  });
+  return lines.join("\n");
+}
+
+/* =========================
+   10) TIMER
+========================= */
+function startTimer(){
+  if(state.startTs==null) state.startTs=Date.now();
+  setInterval(()=>{
+    if(state.startTs!=null){
+      state.elapsedSec=Math.floor((Date.now()-state.startTs)/1000);
+      document.getElementById("timer").textContent=fmtTime(state.elapsedSec);
+      if(state.elapsedSec%10===0) saveState(true);
+    }
+  },1000);
+}
+
+/* =========================
+   11) TEACHER MODE
+========================= */
+function teacherMode(){
+  const code=prompt("Nhập mã giáo viên để xem đáp án:");
+  if(code==null) return;
+  if(code.trim()===TEACHER_CODE){
+    state.teacherMode=true; saveState(true); render(); toast("Đã bật chế độ giáo viên.");
+  }else toast("Mã không đúng.");
+}
+
+/* =========================
+   12) WIRE UI + INIT
+========================= */
+function wire(){
+  document.getElementById("btnSubmit").onclick=submitSection;
+  document.getElementById("btnRetry").onclick=retrySection;
+  document.getElementById("btnExplain").onclick=toggleExplain;
+  document.getElementById("btnAnswers").onclick=toggleAnswers;
+  document.getElementById("btnNext").onclick=nextSection;
+  document.getElementById("btnExport").onclick=exportReport;
+  document.getElementById("btnSave").onclick=()=>{ saveState(false); };
+  document.getElementById("btnReset").onclick=resetAll;
+  document.getElementById("btnTeacher").onclick=teacherMode;
+
+  document.getElementById("btnMusic").onclick=async ()=>{
+    ensureMusic();
+    if(bg.ctx && bg.ctx.state==="suspended"){ try{ await bg.ctx.resume(); }catch(e){} }
+    setMusic(!bg.isOn);
+  };
+  document.getElementById("vol").oninput=async (e)=>{
+    ensureMusic();
+    if(bg.ctx && bg.ctx.state==="suspended"){ try{ await bg.ctx.resume(); }catch(e){} }
+    setVol(Number(e.target.value)/100);
+  };
+
+  window.addEventListener("pointerdown", async ()=>{
+    if(bg.ctx && bg.ctx.state==="suspended"){ try{ await bg.ctx.resume(); }catch(e){} }
+  }, {once:true});
+}
+
+(function init(){
+  loadState();
+  loadMusic();
+  updateMusicUI();
+  wire();
+  startTimer();
+  render();
+})();
+</script>
+</body>
+</html>
